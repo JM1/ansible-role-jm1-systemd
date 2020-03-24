@@ -1,0 +1,39 @@
+---
+- set_fact:
+    enabled: "{{ __enabled}}"
+  when: enabled|default(None) == None
+
+- set_fact:
+    masked: "{{ __masked}}"
+  when: masked|default(None) == None
+
+- set_fact:
+    name: "{{ __name}}"
+  when: name|default(None) == None
+
+- shell: systemctl list-unit-files --no-legend "{{ name }}" | awk '{print $2}'
+  register: systemctl_result
+  when: (name|default(None) != None)
+  changed_when: false
+
+- set_fact:
+    state: systemctl_result.stdout
+    systemctl_result: !!null
+
+- shell: systemctl enable "{{ name }}"
+  when: (name|default(None) != None) and (enabled|default(None) == True) and state != 'enabled'
+
+- shell: systemctl disable "{{ name }}"
+  when: (name|default(None) != None) and (enabled|default(None) == False) and state != 'disabled'
+
+- shell: systemctl mask "{{ name }}"
+  when: (name|default(None) != None) and (masked|default(None) == True) and state != 'masked'
+
+- shell: systemctl unmask "{{ name }}"
+  when: (name|default(None) != None) and (masked|default(None) == False) and state == 'masked'
+
+- set_fact:
+    enabled: !!null
+    masked: !!null
+    name: !!null
+    state: !!null
