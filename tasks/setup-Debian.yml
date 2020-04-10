@@ -11,6 +11,11 @@
     name: "{{ __name}}"
   when: name|default(None) == None
 
+- name: Fail if required vars are not set
+  fail:
+  when: >
+    name == None or name|length == 0
+
 - shell: systemctl list-unit-files --no-legend "{{ name }}" | awk '{print $2}'
   register: systemctl_result
   when: (name|default(None) != None)
