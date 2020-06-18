@@ -11,6 +11,12 @@
     name: "{{ __name}}"
   when: name|default(None) == None
 
+- name: Cleanup role default variables
+  set_fact:
+    __enabled: !!null
+    __masked: !!null
+    __name: !!null
+
 - name: Fail if required vars are not set
   fail:
   when: >
