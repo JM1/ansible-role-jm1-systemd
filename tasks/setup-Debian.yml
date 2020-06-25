@@ -1,16 +1,4 @@
 ---
-- set_fact:
-    enabled: "{{ __enabled}}"
-  when: enabled|default(None) == None
-
-- set_fact:
-    masked: "{{ __masked}}"
-  when: masked|default(None) == None
-
-- set_fact:
-    name: "{{ __name}}"
-  when: name|default(None) == None
-
 - name: Fail if required vars are not set
   fail:
   when: >
@@ -22,23 +10,20 @@
   changed_when: false
 
 - set_fact:
-    state: systemctl_result.stdout
+    systemd_unit_state: systemctl_result.stdout
     systemctl_result: !!null
 
 - shell: systemctl enable "{{ name }}"
-  when: (name|default(None) != None) and (enabled|default(None) == True) and state != 'enabled'
+  when: (name|default(None) != None) and (enabled|default(None) == True) and systemd_unit_state != 'enabled'
 
 - shell: systemctl disable "{{ name }}"
-  when: (name|default(None) != None) and (enabled|default(None) == False) and state != 'disabled'
+  when: (name|default(None) != None) and (enabled|default(None) == False) and systemd_unit_state != 'disabled'
 
 - shell: systemctl mask "{{ name }}"
-  when: (name|default(None) != None) and (masked|default(None) == True) and state != 'masked'
+  when: (name|default(None) != None) and (masked|default(None) == True) and systemd_unit_state != 'masked'
 
 - shell: systemctl unmask "{{ name }}"
-  when: (name|default(None) != None) and (masked|default(None) == False) and state == 'masked'
+  when: (name|default(None) != None) and (masked|default(None) == False) and systemd_unit_state == 'masked'
 
 - set_fact:
-    enabled: !!null
-    masked: !!null
-    name: !!null
-    state: !!null
+    systemd_unit_state: !!null
